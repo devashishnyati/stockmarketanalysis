@@ -18,6 +18,9 @@ import os
 
 
 def save_sp500():
+    '''
+    Get list of SP500 Companies
+    '''
     resp = requests.get('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
     soup = bs.BeautifulSoup(resp.text, 'lxml')
     table = soup.find('table', {'id': 'constituents'})
@@ -49,6 +52,9 @@ _ = save_sp500()
 
 
 def save_ibovespa():
+    '''
+    Get list of Ibovespa companies
+    '''
     resp = requests.get('https://en.wikipedia.org/wiki/List_of_companies_listed_on_Ibovespa')
     soup = bs.BeautifulSoup(resp.text, 'lxml')
     table = soup.find('table', {'id': 'constituents'})
@@ -86,6 +92,9 @@ _ = save_ibovespa()
 
 
 def get_data_from_yahoo_sp(reload_sp_500=False):
+    '''
+    Get stock prices of SP 500 companies
+    '''
     if reload_sp_500:
         tickers = save_sp500()
     else:
@@ -108,6 +117,9 @@ def get_data_from_yahoo_sp(reload_sp_500=False):
 
 
 def get_data_from_yahoo_ibovespa(reload_ibovespa=False):
+    '''
+    Get stock prices of Ibovspa companies
+    '''
     if reload_ibovespa:
         tickers = save_ibovespa()
     else:
@@ -139,6 +151,9 @@ get_data_from_yahoo_ibovespa()
 
 
 def compile_data_sp():
+    '''
+    Compile SP 500 companies to one list
+    '''
     sp = pd.read_csv('data/sp500.csv')
     tickers = sp.ticker.tolist()
     
@@ -163,6 +178,9 @@ compile_data_sp()
 
 
 def compile_data_ibovespa():
+    '''
+    Compile Ibovespa companies to one list
+    '''
     ibovespa = pd.read_csv('data/ibovespa.csv')
     tickers = ibovespa.ticker.tolist()
     
@@ -190,6 +208,9 @@ def compile_data_ibovespa():
 compile_data_ibovespa()
 
 def calculate_pct_change(price_file,end,start,name_file):
+    '''
+    Calculate profit change in closing prices
+    '''
     sp_500 = pd.read_csv(price_file, index_col='Date').T
     sp_500.index.names = ['ticker']
     sp_500['Percentage Change'] = (sp_500[end]-sp_500[start])*100/sp_500[start]
@@ -206,6 +227,7 @@ print('\n')
 print('--- 10 years ago, top 10 investments across the Brazil stock markets ---')
 print(calculate_pct_change('data/ibovespa_joined.csv','2019-04-05','2009-01-02','data/ibovespa.csv'))
 print('\n')
+print('\n')
 print('--- 5 Years Ago, Top 10 Investments Across the US Stock Markets ---')
 print(calculate_pct_change('data/sp500_joined.csv','2019-04-05','2014-01-02','data/sp500.csv'))
 print('\n')
@@ -214,6 +236,9 @@ print(calculate_pct_change('data/ibovespa_joined.csv','2019-04-05','2014-01-02',
 print('\n--- ---')
 
 def plot_high(exchange,ticker=''):
+    '''
+    Plot monthly opening, closing, high and low values
+    '''
     if ticker:
         df_high= pd.read_csv('data/{}_stocks/{}.csv'.format(exchange,ticker), parse_dates=True, index_col = 0)
     else:
@@ -242,6 +267,9 @@ plot_high('ibovespa','LREN3')
 
 
 def get_data_from_yahoo_index(ticker):
+    '''
+    Get index data
+    '''
     if not os.path.exists('data/'):
         os.makedirs('data/')
     
@@ -296,7 +324,7 @@ print('Another stock less than $11.55 that can be bought: AMD')
 print('Lowest price of AMD stock on 2014-01-02: $3.83')
 print('Closing price of AMD stock on 2019-04-05: $28.97')
 print('Number of AMD stocks that can be bought: 3')
-print('Maximum return on investment of R$100, US (assuming current 1R$ = 0.26$): R$'+str(((nvda_close-nvda_low)*2+(amd_close-amd_low)*3+(43-nvda_low*2-amd_low*3))/0.26))
+print('Maximum return on investment of R$100, US (assuming current 1$ = 3.85R$): R$'+str(((nvda_close-nvda_low)*2+(amd_close-amd_low)*3+(43-nvda_low*2-amd_low*3))*3.85))
 
 
 # 2 shares of nvda and 3 shares of amd
@@ -311,11 +339,13 @@ elet3_close = elet3[elet3.index == '2019-04-05']['Close'].values.tolist()[0]
 
 
 print('\n--- ---')
+print('Value of R$100 5 years ago: $43')
+print('Money Available: $43')
 print('Maximum profit stock: ELET3')
 print('Lowest price of ELET3 stock on 2014-01-02: $5.51')
 print('Closing price of ELET3 stock on 2019-04-05: $35.66')
-print('Number of ELET3 stocks that can be bought: 18')
-print('Maximum return on investment of R$100, Brazil: R$'+str((elet3_close-elet3_low)*18 + 100-elet3_low*18))
+print('Number of ELET3 stocks that can be bought: 8')
+print('Maximum return on investment of R$100, Brazil (assuming current 1$ = 3.85R$): R$'+str(((elet3_close-elet3_low)*8 + 43-elet3_low*8)*3.85))
 print('\n--- ---')
 
 
